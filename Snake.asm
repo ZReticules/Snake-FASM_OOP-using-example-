@@ -174,6 +174,7 @@ proc bt_Start_BN_CLICKED uses rbx, lpForm, lpParams, lpControl
 			mov [.form.hTimer], 0
 		.noTimer:
 		@call [UnhookWindowsHookEx]([.form.hook])
+		mov [.form.WM_KEYDOWN], dForm1_KeyDownStart
 		@call .form.bt_Start->setVisible(1)
 		@call .form.st_Score->setText("")
 		@call .form.g->fillRect(addr .form.rcCanv, [.form.canvBrush])
