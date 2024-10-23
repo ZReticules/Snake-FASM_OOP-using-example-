@@ -1,5 +1,5 @@
 # Snake-FASM_OOP-using-example-
-Графическая змейка на ассемблере FASM c использованием FASM_OOP для x86_64 под Windows
+Графическая змейка на ассемблере FASM c использованием FASM_OOP для x86_64 под Windows  
 Инклуды для сборки для папки TOOLS находятся [здесь](https://github.com/ZReticules/FASM_OOP/tree/master).
 
 Для начала игры можно нажать Enter или ESC.  
