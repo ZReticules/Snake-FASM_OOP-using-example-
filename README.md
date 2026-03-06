@@ -1,12 +1,12 @@
 # Snake-FASM_OOP-using-example-
 Графическая змейка на ассемблере FASM c использованием FASM_OOP для x86_64 под Windows.  
 <figure>
-    <img src="Start.png" alt="Image not found" />
-    <figcaption>Стартовый экран</figcaption>
+<img src="Start.png" alt="Image not found" />
+<figcaption>Стартовый экран</figcaption>
 </figure>
 <figure>
-    <img src="Gameplay.png" alt="Image not found" />
-    <figcaption>Геймплей</figcaption>
+<img src="Gameplay.png" alt="Image not found" />
+<figcaption>Геймплей</figcaption>
 </figure>  
 
 Для самостоятельной сборки необходимо подтянуть гитмодули  
