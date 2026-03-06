@@ -33,24 +33,24 @@ importlib user32,\
 
 entry main
 
-struct Matrix_byte
-	bCount 	dd ?
-	len0 	dd ?
-	len1 	dd ?
-	arr 	db 0 dup(?)
+struct ByteMatrix
+	bCount 	rd 1
+	len0 	rd 1
+	len1 	rd 1
+	arr 	rb 0
 ends
 
 struct SnakePart
 	rect 	RECT
-	mapPos 	dd ?
-	direct 	dd ?
+	mapPos 	rd 1
+	direct 	rd 1
 ends
 
 struct StartButton BUTTON
 	BN_CLICKED 	event ?
 	WM_PAINT  	hook ?
 
-	fEnabled 	dd ?
+	fEnabled 	rd 1
 ends
 
 struct MainForm DIALOGFORM
@@ -83,7 +83,7 @@ struct MainForm DIALOGFORM
 		_cx: 50,\
 		_text: "Начать",\
 		_style: WS_VISIBLE or BS_DEFPUSHBUTTON or BS_FLAT,\
-		<_initvals: MainForm_btStart_Cicked, MainForm_btStart_Paint>
+		<_initvals: MainForm.btStart_Cicked, MainForm.btStart_Paint>
 
 	lpMap 		rptr 1
 
@@ -108,13 +108,13 @@ struct MainForm DIALOGFORM
 	mapInc 		dd -1, ?, 1, ?
 	score 		dd 0
 	scoreStr	db "Счёт: "
-	scoreIntBuf	db 11 dup(?)
+	scoreIntBuf	rb 11
 	rnd 		Random
 ends
 
 .proc_frame_mode_static
 
-.proc MainForm_Init(.lpForm, .lpParams, .lpEventData) uses pbx
+.proc MainForm_Init(.p_form, .p_params, .p_eventData) uses pbx
 	virtObj .form MainForm at pbx from @arg1
 	.local .headOffset:DWORD
 	$call .form::setCornerType(DWMWCP.DONOTROUND)
@@ -164,15 +164,15 @@ ends
 	divss xmm2, xmm3
 	movd [.form.xf.eM22], xmm2
 
-	$call CNV|alloc(addr sizeof.Matrix_byte + eax * 1)
+	$call CNV|alloc(addr sizeof.ByteMatrix + eax * 1)
 	mov [.form.lpMap], pax
 	mov edx, [.matrixSize]
-	mov [pax + Matrix_byte.bCount], edx
+	mov [pax + ByteMatrix.bCount], edx
 	mov edx, [.y]
-	mov [pax + Matrix_byte.len0], edx
+	mov [pax + ByteMatrix.len0], edx
 	mov edx, [.x]
-	mov [pax + Matrix_byte.len1], edx
-	mov dword[pax + Matrix_byte.arr], 03h
+	mov [pax + ByteMatrix.len1], edx
+	mov dword[pax + ByteMatrix.arr], 03h
 	$call .form.rnd::make()
 
 	$call [CreateCompatibleBitmap]([.form.g.hDC], [.form.rightBound], [.form.downBound])
@@ -189,10 +189,10 @@ ends
 	$return 1
 .endp
 
-.proc cdecl MakeMeal(.lpForm) uses pbx psi
+.proc cdecl MakeMeal(.p_form) uses pbx psi
 	.local .mealRect:RECT
 	virtObj .form MainForm at pbx from @arg1
-	virtObj .map Matrix_byte at psi from [.form.lpMap]
+	virtObj .map ByteMatrix at psi from [.form.lpMap]
 	.randAgain:
 		$call .form.rnd::next([.map.bCount])
 	cmp [.map.arr + pax], 0
@@ -221,7 +221,7 @@ ends
 	$return pax
 .endp
 
-.proc MainForm_btStart_Paint(.p_form, .p_params, .p_control:P_StartButton, .p_eventData)
+.proc MainForm.btStart_Paint(.p_form, .p_params, .p_control:P_StartButton, .p_eventData)
 	virtObj .btn StartButton at pbx from @arg3
 	.local .ps:PAINTSTRUCT, .btnRect:RECT
 	$call [BeginPaint]([.btn.hWnd], &.ps)
@@ -232,7 +232,7 @@ ends
 	$return 0
 .endp
 
-.proc MainForm_Hook(.nCode, .wparam, .lparam) uses pbx
+.proc MainForm_Hook(.nCode, .wParam, .lParam) uses pbx
 	@larg pbx, @arg3
 	switch [pbx + MSG.message]
 		case WM_KEYDOWN, WM_CHAR, WM_SYSKEYDOWN
@@ -245,9 +245,9 @@ ends
 	end_switch
 .endp
 
-.proc cdecl StartGame(.lpForm) uses pbx psi
+.proc cdecl StartGame(.p_form) uses pbx psi
 	virtObj .form MainForm at pbx from @arg1
-	virtObj .map Matrix_byte at psi from [.form.lpMap]
+	virtObj .map ByteMatrix at psi from [.form.lpMap]
 	$call CNV|memset(&.map.arr, 0, [.map.bCount])
 	mov dword[.map.arr], 03h
 
@@ -280,7 +280,7 @@ ends
 	ret
 .endp
 
-.proc MainForm_btStart_Cicked(.lpForm, .lpParams, .lpControl, .lpEventData) uses pbx
+.proc MainForm.btStart_Cicked(.p_form, .p_params, .p_control, .p_eventData) uses pbx
 	virtObj .form MainForm at pbx from @arg1
 	virtObj .button StartButton at .form.btStart
 	cmp [.button.fEnabled], 0
@@ -310,7 +310,7 @@ ends
 	ret
 .endp
 
-.proc MainForm_Paint(.lpForm, .lpParams, .lpEventData) uses pbx
+.proc MainForm_Paint(.p_form, .p_params, .p_eventData) uses pbx
 	virtObj .form MainForm at pbx from @arg1
 	.local .ps:PAINTSTRUCT
 	$call [BeginPaint]([.form.hWnd], &.ps);
@@ -321,11 +321,11 @@ ends
 	$return 0
 .endp
 
-.proc MainForm_Timer(.lpForm, .lpParams, .lpEventData) uses pbx psi
+.proc MainForm_Timer(.p_form, .p_params, .p_eventData) uses pbx psi
 	virtObj .form MainForm at pbx from @arg1
 	cmp [.form.newDirect], 7
 		je .restart
-	virtObj .map Matrix_byte at psi from [.form.lpMap]
+	virtObj .map ByteMatrix at psi from [.form.lpMap]
 	test [.form.head.rect.left], 1 shl MainForm.SIZE_PART - 1
 	jnz .no_cell_border
 	test [.form.head.rect.top], 1 shl MainForm.SIZE_PART - 1
@@ -417,7 +417,7 @@ ends
 		ret
 .endp
 
-.proc MainForm_KeyDownStart(.lpForm, .lpParams, .lpEventData)
+.proc MainForm_KeyDownStart(.p_form, .p_params, .p_eventData)
 	virtObj .form MainForm at pcx from @arg1
 	virtObj .params params at pdx from @arg2
 	movzx eax, byte[.params.wParam]
@@ -436,15 +436,15 @@ ends
 			.equalDirections:
 			mov [.form.newDirect], eax
 			mov [.form.WM_KEYDOWN], MainForm_KeyDown
-			mov [.lpForm], pcx
+			mov [.p_form], pcx
 			$call WND|setTimer(10, NULL, 1, [.form.hWnd])
-			mov pcx, [.lpForm]
+			mov pcx, [.p_form]
 			mov [.form.hTimer], pax
 	end_switch
 	ret
 .endp
 
-.proc MainForm_KeyDown(.lpForm, .lpParams, .lpEventData)
+.proc MainForm_KeyDown(.p_form, .p_params, .p_eventData)
 	virtObj .form MainForm at pcx from @arg1
 	virtObj .params params at pdx from @arg2
 	movzx eax, byte[.params.wParam]
@@ -466,7 +466,7 @@ ends
 	.return: ret
 .endp
 
-.proc MainForm_Close(.lpForm, .lpParams, .lpEventData) uses pbx
+.proc MainForm_Close(.p_form, .p_params, .p_eventData) uses pbx
 	virtObj .form MainForm at pbx from @arg1
 	@sarg @arg2
 
@@ -493,7 +493,6 @@ myForm dForm MainForm
 .proc main
 	$call myForm::start(NULL)
 	$call [ExitProcess](0)
-	ret
 .endp
 
 ; data resource
@@ -507,8 +506,8 @@ myForm dForm MainForm
 ; 	endres
 ; end data
 
-; .proc Matrix_byte.print uses pbx psi rdi r12, this
-; 	virtObj .this Matrix_byte at pbx from pcx
+; .proc ByteMatrix.print uses pbx psi rdi r12, this
+; 	virtObj .this ByteMatrix at pbx from pcx
 ; 	xor esi, esi
 ; 	mov edi, [.this.len1]
 ; 	mov r12d, [.this.len0]
