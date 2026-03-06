@@ -1,7 +1,7 @@
 define PROGRAM_TYPE GUI 6.0
 
 include "encoding\win1251.inc"
-include "FASM_OOP\x86.inc"
+include "FASM_OOP\x64.inc"
 include "FASM_OOP\Winuser.inc"
 include "FASM_OOP\DialogForm.inc"
 
@@ -226,7 +226,7 @@ ends
 	.local .ps:PAINTSTRUCT, .btnRect:RECT
 	$call [BeginPaint]([.btn.hWnd], &.ps)
 	$call [GetStockObject](BLACK_BRUSH)
-	; int3$call 
+	; int3
 	$call WND|repaintWindow([.btn.hWnd], [.ps.hdc], &.ps.rcPaint, pax)
 	$call [EndPaint]([.btn.hWnd], &.ps)
 	$return 0
