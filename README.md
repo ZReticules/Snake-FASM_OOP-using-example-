@@ -3,12 +3,14 @@
 <figure>
 <img src="Start.png" alt="Image not found" />
 <figcaption>Стартовый экран</figcaption>
-</figure>
+</figure>  
+
 <figure>
 <img src="Gameplay.png" alt="Image not found" />
 <figcaption>Геймплей</figcaption>
 </figure>  
-
+  
+  
 Для самостоятельной сборки необходимо подтянуть гитмодули  
 `git clone --recurse-submodules https://github.com/ZReticules/Snake-FASM_OOP-using-example-`  
 
