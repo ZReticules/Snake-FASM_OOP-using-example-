@@ -88,7 +88,7 @@ struct MainForm DIALOGFORM
 	lpMap 		rptr 1
 
 	hTimer		rptr 1
-	hook_ 		rptr 1
+	hHook 		rptr 1
 	canvBrush 	rptr 1
 	bodyBrush 	rptr 1
 	headBrush 	rptr 1
@@ -226,7 +226,6 @@ ends
 	.local .ps:PAINTSTRUCT, .btnRect:RECT
 	$call [BeginPaint]([.btn.hWnd], &.ps)
 	$call [GetStockObject](BLACK_BRUSH)
-	; int3
 	$call WND|repaintWindow([.btn.hWnd], [.ps.hdc], &.ps.rcPaint, pax)
 	$call [EndPaint]([.btn.hWnd], &.ps)
 	$return 0
@@ -290,7 +289,7 @@ ends
 		$call .form.stScore::setVisible(1)
 		$call [GetCurrentThreadId]()
 		$call [SetWindowsHookExA](WH_GETMESSAGE, MainForm_Hook, NULL, pax)
-		mov [.form.hook_], pax
+		mov [.form.hHook], pax
 		$call StartGame(&.form)
 		ret
 	@endb
@@ -300,7 +299,7 @@ ends
 		$call WND|killTimer([.form.hTimer], [.form.hWnd])
 		mov [.form.hTimer], NULL
 	.no_timer:
-	$call [UnhookWindowsHookEx]([.form.hook_])
+	$call [UnhookWindowsHookEx]([.form.hHook])
 	mov [.form.WM_KEYDOWN], MainForm_KeyDownStart
 	$call .form.btStart::setVisible(1)
 	$call .form.stScore::setVisible(0)
@@ -474,9 +473,9 @@ ends
 	$call [DeleteObject]([.form.headBrush])
 	$call [DeleteObject]([.form.mealBrush])
 	$call .form.g::unmake()
-	cmp [.form.hook_], 0
+	cmp [.form.hHook], 0
 	je .no_hook
-		$call [UnhookWindowsHookEx]([.form.hook_])
+		$call [UnhookWindowsHookEx]([.form.hHook])
 	.no_hook:
 	$call CNV|free([.form.lpMap])
 	cmp [.form.hTimer], 0
